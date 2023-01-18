@@ -12,6 +12,8 @@ with open('config.json', 'r') as f:
     config = json.load(f)
 video_speed = config['speed']
 video_color_effect = config['colorEffect']
+video_flip = config['flip']
+video_volume = config['audioVolume']
 
 
 def get_video_file_in_directory():
@@ -38,23 +40,32 @@ def edit_video(video_name, audio_to_add_to_video, logo_to_add_to_video):
     logo = path_to_logo+'/'+logo_to_add_to_video
     # edit speed video
     clip = clip.fx(vfx.speedx, video_speed)
+    print("Edit speed complete.")
     # edit saturation video
     clip = clip.fx(vfx.colorx, video_color_effect)
+    print("Edit color complete.")
+    # flip video
+    if video_flip == 1:
+        clip.fx(vfx.mirror_x)
+        print("flip video complete.")
     # add audio
     audio_clip = AudioFileClip(path_to_audio + '/' + audio_to_add_to_video).set_duration(clip.duration)
-    clip.set_audio(audio_clip)
+    clip = clip.set_audio(audio_clip)
+    clip = clip.volumex(video_volume)
+    print("Edit audio complete.")
     # add logo
     logo_image = (ImageClip(logo)
                   .set_duration(clip.duration)
                   .resize(height=50)
                   .set_pos(("right", "top")))
-
-    CompositeVideoClip(
+    print("add logo complete.")
+    final_clip = CompositeVideoClip(
         [
             clip,
             logo_image
         ]
-    ).write_videofile(path_to_edited_video+'/'+video_name)
+    )
+    final_clip.write_videofile(path_to_edited_video+'/'+video_name)
 
 
 if __name__ == '__main__':
